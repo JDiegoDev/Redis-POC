@@ -3,6 +3,7 @@ const db = require("./db");
 const app = express();
 const { restaurantController } = require("./controllers/restaurant-controller");
 const { initializeRedisClient } = require("./redis");
+const cachedData = require("./middleware");
 
 const connectRedis = async () => {
   await initializeRedisClient();
@@ -12,8 +13,16 @@ const connectDb = async () => {
   await db.connect();
   connectRedis();
 
-  app.get("/api/v1/restaurants", restaurantController.getAllRestaurants);
-  app.get("/api/v1/restaurants/:id", restaurantController.getRestaurantById);
+  app.get(
+    "/api/v1/restaurants",
+    cachedData,
+    restaurantController.getAllRestaurants
+  );
+  app.get(
+    "/api/v1/restaurants/:id",
+    cachedData,
+    restaurantController.getRestaurantById
+  );
 };
 
 connectDb();
